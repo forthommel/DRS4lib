@@ -63,7 +63,7 @@ The output is an image, similar to ```230529_01.png```
 ![alt text](https://github.com/ledovsk/RADiCAL_TB_May2023/blob/main/230529_01.png)
 
 ## Script 
-An example script that performs all steps above
+An example script that performs all steps above. One need to modify it to specify path to DRS files, desired run numbers and destination for results
 ```
 ./run.sh
 ```
