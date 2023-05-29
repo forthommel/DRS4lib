@@ -60,6 +60,7 @@ This step is done with
 > root -l CheckSync.C
 ```
 The output is an image, similar to ```230529_01.png```
+![alt text](https://github.com/ledovsk/RADiCAL_TB_May2023/blob/main/230529_01.png)
 
 ## Script 
 An example script that performs all steps above
