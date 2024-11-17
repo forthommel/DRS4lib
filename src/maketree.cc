@@ -57,7 +57,7 @@ int main(int argc, char** argv) {
   if (idrs == 1)
     drsID = 21333;
   drs4::Calibrations calibrations("../data");
-  const auto& module_calibrations = calibrations.addModuleCalibrations(drsID, 2, 8, 1024);
+  const auto& module_calibrations = calibrations.addModuleCalibrations(drsID, 2, 8);
 
   //**************************************
   // Define output

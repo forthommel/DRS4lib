@@ -9,12 +9,10 @@ Calibrations::Calibrations(const std::string& path, const std::string& filename_
 
 const ModuleCalibrations& Calibrations::addModuleCalibrations(size_t module_id,
                                                               size_t num_groups,
-                                                              size_t num_channels,
-                                                              size_t num_adc_values) {
+                                                              size_t num_channels) {
   modules_calibrations_.insert(std::make_pair(
       module_id,
-      ModuleCalibrations(
-          base_path_ / std::to_string(module_id) / filename_base_path_, num_groups, num_channels, num_adc_values)));
+      ModuleCalibrations(num_groups, num_channels, base_path_ / std::to_string(module_id) / filename_base_path_)));
   return moduleCalibrations(module_id);
 }
 
@@ -24,16 +22,13 @@ const ModuleCalibrations& Calibrations::moduleCalibrations(size_t module_id) con
   return modules_calibrations_.at(module_id);
 }
 
-ModuleCalibrations::ModuleCalibrations(const std::string& path,
-                                       size_t num_groups,
-                                       size_t num_channels,
-                                       size_t num_adc_values) {
+ModuleCalibrations::ModuleCalibrations(size_t num_groups, size_t num_channels, const std::string& path) {
   for (size_t i = 0; i < num_groups; ++i)
-    addGroupCalibrations(path + "gr" + std::to_string(i), num_channels, num_adc_values);
+    addGroupCalibrations(num_channels, path + "gr" + std::to_string(i));
 }
 
-void ModuleCalibrations::addGroupCalibrations(const std::string& path, size_t num_channels, size_t num_adc_values) {
-  groups_calibrations_.emplace_back(path, num_channels, num_adc_values);
+void ModuleCalibrations::addGroupCalibrations(size_t num_channels, const std::string& path) {
+  groups_calibrations_.emplace_back(num_channels, path);
 }
 
 const GroupCalibrations& ModuleCalibrations::groupCalibrations(size_t igroup) const {
@@ -42,14 +37,14 @@ const GroupCalibrations& ModuleCalibrations::groupCalibrations(size_t igroup) co
   return groups_calibrations_.at(igroup);
 }
 
-GroupCalibrations::GroupCalibrations(const std::string& path, size_t num_channels, size_t num_adc_values)
+GroupCalibrations::GroupCalibrations(size_t num_channels, const std::string& path)
     : base_path_(path), channels_calibrations_(num_channels + 1) {
-  loadVoltageCalibrations(num_adc_values);
-  loadSampleCalibrations(num_adc_values);
-  loadTimeCalibrations(num_adc_values);
+  loadVoltageCalibrations();
+  loadSampleCalibrations();
+  loadTimeCalibrations();
 }
 
-void GroupCalibrations::loadVoltageCalibrations(size_t num_adc_values, const std::string& postfix) {
+void GroupCalibrations::loadVoltageCalibrations(const std::string& postfix) {
   std::ifstream file(base_path_ + postfix);
   int ich, it, ioff;
   std::string line;
@@ -60,7 +55,7 @@ void GroupCalibrations::loadVoltageCalibrations(size_t num_adc_values, const std
   }
 }
 
-void GroupCalibrations::loadSampleCalibrations(size_t num_adc_values, const std::string& postfix) {
+void GroupCalibrations::loadSampleCalibrations(const std::string& postfix) {
   std::ifstream file(base_path_ + postfix);
   int ich, it, ioff;
   std::string line;
@@ -71,7 +66,7 @@ void GroupCalibrations::loadSampleCalibrations(size_t num_adc_values, const std:
   }
 }
 
-void GroupCalibrations::loadTimeCalibrations(size_t num_adc_values, const std::string& postfix) {
+void GroupCalibrations::loadTimeCalibrations(const std::string& postfix) {
   std::ifstream file(base_path_ + postfix);
   int it;
   float y;

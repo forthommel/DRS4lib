@@ -25,11 +25,11 @@ namespace drs4 {
 
   class GroupCalibrations {
   public:
-    explicit GroupCalibrations(const std::string& path, size_t num_channels, size_t num_adc_values);
+    explicit GroupCalibrations(size_t num_channels, const std::string& path);
 
-    void loadVoltageCalibrations(size_t num_adc_values, const std::string& postfix = "_cell.txt");
-    void loadSampleCalibrations(size_t num_adc_values, const std::string& postfix = "_nsample.txt");
-    void loadTimeCalibrations(size_t num_adc_values, const std::string& postfix = "_time.txt");
+    void loadVoltageCalibrations(const std::string& postfix = "_cell.txt");
+    void loadSampleCalibrations(const std::string& postfix = "_nsample.txt");
+    void loadTimeCalibrations(const std::string& postfix = "_time.txt");
 
     friend std::ostream& operator<<(std::ostream&, const GroupCalibrations&);
 
@@ -47,14 +47,11 @@ namespace drs4 {
 
   class ModuleCalibrations {
   public:
-    explicit ModuleCalibrations(const std::string& path = "",
-                                size_t num_groups = 0,
-                                size_t num_channels = 0,
-                                size_t num_adc_values = 0);
+    explicit ModuleCalibrations(size_t num_groups = 0, size_t num_channels = 0, const std::string& path = "");
 
     friend std::ostream& operator<<(std::ostream&, const ModuleCalibrations&);
 
-    void addGroupCalibrations(const std::string& path, size_t num_channels, size_t num_adc_values);
+    void addGroupCalibrations(size_t num_channels, const std::string& path);
     const GroupCalibrations& groupCalibrations(size_t) const;
 
   private:
@@ -67,10 +64,7 @@ namespace drs4 {
 
     friend std::ostream& operator<<(std::ostream&, const Calibrations&);
 
-    const ModuleCalibrations& addModuleCalibrations(size_t module_id,
-                                                    size_t num_groups,
-                                                    size_t num_channels,
-                                                    size_t num_adc_values);
+    const ModuleCalibrations& addModuleCalibrations(size_t module_id, size_t num_groups = 2, size_t num_channels = 8);
     const ModuleCalibrations& moduleCalibrations(size_t module_id) const;
 
   private:

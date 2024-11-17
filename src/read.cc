@@ -10,8 +10,8 @@
 
 int main() {
   drs4::Calibrations calibrations("../data");
-  const auto& module1_calibrations = calibrations.addModuleCalibrations(13118, 2, 8, 1024);
-  const auto& module2_calibrations = calibrations.addModuleCalibrations(21333, 2, 8, 1024);
+  const auto& module1_calibrations = calibrations.addModuleCalibrations(13118, 2, 8);
+  const auto& module2_calibrations = calibrations.addModuleCalibrations(21333, 2, 8);
 
   std::cout << calibrations << std::endl;
 
