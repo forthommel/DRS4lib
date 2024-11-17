@@ -4,6 +4,7 @@
 #include <array>
 #include <fstream>
 #include <memory>
+#include <unordered_map>
 
 #include "DRS4lib/Calibrations.h"
 
@@ -15,7 +16,7 @@ namespace drs4 {
   public:
     Reader() = default;
 
-    void addModule(const std::string& filename, size_t module_id, const ModuleCalibrations&);
+    void addModule(const std::string& filename, size_t module_id = 0, const ModuleCalibrations& = ModuleCalibrations());
 
     bool next(GlobalEvent&);
 

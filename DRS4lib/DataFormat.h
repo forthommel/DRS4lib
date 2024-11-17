@@ -23,8 +23,6 @@ namespace drs4 {
       return std::vector<bool>{bool(mask & 0x1), bool((mask >> 1) & 0x1)};
     }
     inline uint32_t eventNumber() const { return at(2) & 0xffffff; }
-
-    inline bool valid() const { return (init() == 0b1010) && (size() == 6920) && (bf() == 0); }
   };
 
   class ChannelGroup {
@@ -49,8 +47,6 @@ namespace drs4 {
       channel_waveforms_[channel_id] = waveform;
     }
     inline const std::map<size_t, Waveform> waveforms() const { return channel_waveforms_; }
-
-    inline bool valid() const { return triggerChannel() && (controlBits() == 0); }
 
   private:
     uint32_t first_word_;
@@ -79,6 +75,7 @@ namespace drs4 {
 
     inline void clear() { module_events_.clear(); }
     inline void addModuleEvent(size_t module_id, const Event& event) { module_events_[module_id] = event; }
+    inline const std::unordered_map<size_t, Event> moduleEvents() const { return module_events_; }
 
   private:
     std::unordered_map<size_t, Event> module_events_;

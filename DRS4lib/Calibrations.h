@@ -2,6 +2,8 @@
 #define DRD4lib_Calibrations_h
 
 #include <filesystem>
+#include <iosfwd>
+#include <unordered_map>
 #include <vector>
 
 namespace drs4 {
@@ -9,14 +11,16 @@ namespace drs4 {
   public:
     ChannelCalibrations() = default;
 
-    const std::vector<double>& offMean() const { return off_mean_; }
-    std::vector<double>& offMean() { return off_mean_; }
-    const std::vector<double>& calibSample() const { return calib_sample_; }
-    std::vector<double>& calibSample() { return calib_sample_; }
+    const std::unordered_map<size_t, double>& offMean() const { return off_mean_; }
+    std::unordered_map<size_t, double>& offMean() { return off_mean_; }
+    const std::unordered_map<size_t, double>& calibSample() const { return calib_sample_; }
+    std::unordered_map<size_t, double>& calibSample() { return calib_sample_; }
+
+    friend std::ostream& operator<<(std::ostream&, const ChannelCalibrations&);
 
   private:
-    std::vector<double> off_mean_;
-    std::vector<double> calib_sample_;
+    std::unordered_map<size_t, double> off_mean_;
+    std::unordered_map<size_t, double> calib_sample_;
   };
 
   class GroupCalibrations {
@@ -26,6 +30,8 @@ namespace drs4 {
     void loadVoltageCalibrations(size_t num_adc_values, const std::string& postfix = "_cell.txt");
     void loadSampleCalibrations(size_t num_adc_values, const std::string& postfix = "_nsample.txt");
     void loadTimeCalibrations(size_t num_adc_values, const std::string& postfix = "_time.txt");
+
+    friend std::ostream& operator<<(std::ostream&, const GroupCalibrations&);
 
     inline const std::vector<double> timeCalibrations() const { return tcal_; }
     const ChannelCalibrations& channelCalibrations(size_t) const;
@@ -41,7 +47,12 @@ namespace drs4 {
 
   class ModuleCalibrations {
   public:
-    explicit ModuleCalibrations(const std::string& path, size_t num_groups, size_t num_channels, size_t num_adc_values);
+    explicit ModuleCalibrations(const std::string& path = "",
+                                size_t num_groups = 0,
+                                size_t num_channels = 0,
+                                size_t num_adc_values = 0);
+
+    friend std::ostream& operator<<(std::ostream&, const ModuleCalibrations&);
 
     void addGroupCalibrations(const std::string& path, size_t num_channels, size_t num_adc_values);
     const GroupCalibrations& groupCalibrations(size_t) const;
@@ -54,7 +65,12 @@ namespace drs4 {
   public:
     explicit Calibrations(const std::string& path, const std::string& filename_base_path = "Tables_");
 
-    void addModuleCalibrations(size_t module_id, size_t num_groups, size_t num_channels, size_t num_adc_values);
+    friend std::ostream& operator<<(std::ostream&, const Calibrations&);
+
+    const ModuleCalibrations& addModuleCalibrations(size_t module_id,
+                                                    size_t num_groups,
+                                                    size_t num_channels,
+                                                    size_t num_adc_values);
 
   private:
     const std::filesystem::path base_path_;

@@ -5,7 +5,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 find_package(ROOT REQUIRED)
 
 file(GLOB sources src/*.cc)
-set(executables listGoodEvents maketree merge)
+set(executables listGoodEvents maketree merge read)
 set(executables_sources)
 foreach(_exec ${executables})
   file(GLOB source src/${_exec}.cc)
