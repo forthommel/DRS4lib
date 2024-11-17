@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.30)
 project(DRS4lib)
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 find_package(ROOT REQUIRED)
 
 file(GLOB sources src/*.cc)
