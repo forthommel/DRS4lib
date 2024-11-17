@@ -15,6 +15,7 @@ namespace drs4 {
   class Reader {
   public:
     Reader() = default;
+    explicit Reader(const std::string& pattern, const std::vector<size_t>& modules_ids, const Calibrations&);
 
     void addModule(const std::string& filename, size_t module_id = 0, const ModuleCalibrations& = ModuleCalibrations());
 
@@ -35,10 +36,7 @@ namespace drs4 {
       static std::vector<uint16_t> wordsUnpacker(const std::array<uint32_t, 3>& words);
 
       const ModuleCalibrations calibrations_;
-      struct file_deleter {
-        void operator()(std::FILE* fp) { std::fclose(fp); }
-      };
-      std::unique_ptr<std::FILE, file_deleter> file_;
+      std::ifstream file_;
     };
     std::unordered_map<size_t, ModuleFileReader> files_readers_;
   };

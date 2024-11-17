@@ -34,7 +34,7 @@ namespace drs4 {
     }
 
     /// trigger counter bin
-    inline uint8_t triggerCounter() const { return (first_word_ >> 22) & 0xff; }
+    inline uint16_t triggerCounter() const { return (first_word_ >> 20) & 0xfff; }
     inline uint8_t frequency() const { return (first_word_ >> 16) & 0x3; }
     inline bool triggerChannel() const { return (first_word_ >> 12) & 0x1; }
 

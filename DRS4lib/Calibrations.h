@@ -71,11 +71,12 @@ namespace drs4 {
                                                     size_t num_groups,
                                                     size_t num_channels,
                                                     size_t num_adc_values);
+    const ModuleCalibrations& moduleCalibrations(size_t module_id) const;
 
   private:
     const std::filesystem::path base_path_;
     const std::string filename_base_path_;
-    std::vector<ModuleCalibrations> modules_calibrations_;
+    std::unordered_map<size_t, ModuleCalibrations> modules_calibrations_;
   };
 }  // namespace drs4
 
