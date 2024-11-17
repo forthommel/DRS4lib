@@ -3,9 +3,13 @@
 
 #include <array>
 #include <cstdint>
+#include <map>
+#include <unordered_map>
 #include <vector>
 
 namespace drs4 {
+  using Waveform = std::vector<float>;
+
   class EventHeader : private std::array<uint32_t, 4> {
   public:
     explicit EventHeader(const std::array<uint32_t, 4>& words = {0, 0, 0, 0}) : std::array<uint32_t, 4>(words) {}
@@ -41,20 +45,22 @@ namespace drs4 {
     inline void setTimes(const std::vector<float>& times) { times_ = times; }
     inline const std::vector<float> times() const { return times_; }
 
-    inline void addSample(uint16_t sample) { samples_.emplace_back(sample); }
-    inline const std::vector<uint16_t> samples() const { return samples_; }
+    inline void addChannelWaveform(size_t channel_id, const Waveform& waveform) {
+      channel_waveforms_[channel_id] = waveform;
+    }
+    inline const std::map<size_t, Waveform> waveforms() const { return channel_waveforms_; }
 
     inline bool valid() const { return triggerChannel() && (controlBits() == 0); }
 
   private:
-    const uint32_t first_word_;
+    uint32_t first_word_;
     std::vector<float> times_;
-    std::vector<uint16_t> samples_;
+    std::map<std::size_t, Waveform> channel_waveforms_;
   };
 
   class Event {
   public:
-    explicit Event(const EventHeader& header) : header_(header) {}
+    explicit Event(const EventHeader& header = EventHeader{}) : header_(header) {}
 
     void setHeader(const EventHeader& header) { header_ = header; }
     inline const EventHeader& header() const { return header_; }
@@ -65,6 +71,17 @@ namespace drs4 {
   private:
     EventHeader header_;
     std::vector<ChannelGroup> groups_;
+  };
+
+  class GlobalEvent {
+  public:
+    GlobalEvent() = default;
+
+    inline void clear() { module_events_.clear(); }
+    inline void addModuleEvent(size_t module_id, const Event& event) { module_events_[module_id] = event; }
+
+  private:
+    std::unordered_map<size_t, Event> module_events_;
   };
 }  // namespace drs4
 

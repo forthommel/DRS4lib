@@ -9,14 +9,15 @@
 
 namespace drs4 {
   class Event;
+  class GlobalEvent;
 
   class Reader {
   public:
     Reader() = default;
 
-    void addModule(const std::string& filename, const ModuleCalibrations&);
+    void addModule(const std::string& filename, size_t module_id, const ModuleCalibrations&);
 
-    bool next(Event&);
+    bool next(GlobalEvent&);
 
   private:
     static constexpr std::array<double, 4> tscale_ = {1., 2., 5., 6.6667};
@@ -38,7 +39,7 @@ namespace drs4 {
       };
       std::unique_ptr<std::FILE, file_deleter> file_;
     };
-    std::vector<ModuleFileReader> files_readers_;
+    std::unordered_map<size_t, ModuleFileReader> files_readers_;
   };
 }  // namespace drs4
 
