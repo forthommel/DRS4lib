@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.26.2)
 project(DRS4lib)
 
+include(GNUInstallDirs)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 find_package(ROOT REQUIRED)
 
@@ -15,6 +16,8 @@ endforeach()
 
 add_library(DRS4lib SHARED ${sources})
 target_link_libraries(DRS4lib PUBLIC ROOT::Core ROOT::Gpad ROOT::Hist ROOT::Tree)
+install(TARGETS DRS4lib DESTINATION ${CMAKE_INSTALL_LIBDIR})
+install(DIRECTORY DRS4lib DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
 
 foreach(_exec_src ${executables_sources})
   get_filename_component(exec_bin ${_exec_src} NAME_WE)
