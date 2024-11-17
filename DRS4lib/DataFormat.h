@@ -14,7 +14,10 @@ namespace drs4 {
     inline uint8_t init() const { return at(0) >> 28; }
     inline uint32_t size() const { return at(0) & 0xfffffff; }
     inline bool bf() const { return (at(1) >> 26) & 0x1; }
-    inline uint8_t groupMask() const { return at(1) & 0x3; }
+    inline std::vector<bool> groupMask() const {
+      const auto mask = at(1) & 0x3;
+      return std::vector<bool>{bool(mask & 0x1), bool((mask >> 1) & 0x1)};
+    }
     inline uint32_t eventNumber() const { return at(2) & 0xffffff; }
 
     inline bool valid() const { return (init() == 0b1010) && (size() == 6920) && (bf() == 0); }
@@ -34,6 +37,10 @@ namespace drs4 {
     inline bool triggerChannel() const { return (first_word_ >> 12) & 0x1; }
 
     inline size_t numSamples() const { return (first_word_ & 0xfff) / 3; }
+
+    inline void setTimes(const std::vector<float>& times) { times_ = times; }
+    inline const std::vector<float> times() const { return times_; }
+
     inline void addSample(uint16_t sample) { samples_.emplace_back(sample); }
     inline const std::vector<uint16_t> samples() const { return samples_; }
 
@@ -41,6 +48,7 @@ namespace drs4 {
 
   private:
     const uint32_t first_word_;
+    std::vector<float> times_;
     std::vector<uint16_t> samples_;
   };
 

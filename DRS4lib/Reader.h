@@ -30,6 +30,8 @@ namespace drs4 {
       bool next(Event& event);
 
     private:
+      static std::vector<uint16_t> wordsUnpacker(const std::array<uint32_t, 3>& words);
+
       const ModuleCalibrations calibrations_;
       struct file_deleter {
         void operator()(std::FILE* fp) { std::fclose(fp); }
