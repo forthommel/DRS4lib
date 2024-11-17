@@ -14,7 +14,7 @@ foreach(_exec ${executables})
 endforeach()
 
 add_library(DRS4lib SHARED ${sources})
-target_link_libraries(DRS4lib PUBLIC ROOT::Core ROOT::Tree)
+target_link_libraries(DRS4lib PUBLIC ROOT::Core ROOT::Gpad ROOT::Hist ROOT::Tree)
 
 foreach(_exec_src ${executables_sources})
   get_filename_component(exec_bin ${_exec_src} NAME_WE)
