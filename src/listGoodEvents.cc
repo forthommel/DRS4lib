@@ -1,17 +1,5 @@
-// C++ includes
 #include <algorithm>
-#include <fstream>
 #include <iostream>
-#include <string>
-#include <vector>
-
-// ROOT includes
-#include <TCanvas.h>
-#include <TFile.h>
-#include <TGraphErrors.h>
-#include <TROOT.h>
-#include <TStyle.h>
-#include <TTree.h>
 
 #include "DRS4lib/DataFormat.h"
 #include "DRS4lib/InputParser.h"
