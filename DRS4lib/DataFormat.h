@@ -45,6 +45,8 @@ namespace drs4 {
 
     inline void setTriggerTimeTag(uint32_t trigger_time_tag) { trigger_time_tag_ = trigger_time_tag; }
     inline uint32_t triggerTimeTag() const { return trigger_time_tag_; }
+    inline double triggerTime() const { return trigger_time_tag_multiplier_ * triggerTimeTag(); }
+
     inline void setTimes(const std::vector<float>& times) { times_ = times; }
     inline const std::vector<float> times() const { return times_; }
 
@@ -54,6 +56,8 @@ namespace drs4 {
     inline const std::map<size_t, Waveform> waveforms() const { return channel_waveforms_; }
 
   private:
+    static constexpr double trigger_time_tag_multiplier_ = 8.5e-9;  ///< trigger time multiplier (in s)
+
     uint32_t group_event_description_;
     uint32_t trigger_time_tag_{0};
     std::vector<float> times_;
