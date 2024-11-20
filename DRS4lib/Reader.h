@@ -19,6 +19,7 @@ namespace drs4 {
 
     void addModule(const std::string& filename, size_t module_id = 0, const ModuleCalibrations& = ModuleCalibrations());
 
+    void reset();
     bool next(GlobalEvent&);
 
   private:
@@ -30,6 +31,7 @@ namespace drs4 {
     public:
       explicit ModuleFileReader(const std::string& filename, const ModuleCalibrations&);
 
+      void reset();
       bool next(Event& event);
 
     private:

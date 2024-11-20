@@ -15,6 +15,11 @@ void Reader::addModule(const std::string& filename, size_t module_id, const Modu
   files_readers_.insert(std::make_pair(module_id, ModuleFileReader(filename, calibrations)));
 }
 
+void Reader::reset() {
+  for (auto& [module_id, file_reader] : files_readers_)
+    file_reader.reset();
+}
+
 bool Reader::next(GlobalEvent& event) {
   event.clear();
   ssize_t other_event_number = -999;
@@ -41,6 +46,8 @@ Reader::ModuleFileReader::ModuleFileReader(const std::string& filename, const Mo
   if (file_ = std::ifstream(filename, std::fstream::in | std::fstream::binary); !file_.is_open())
     throw std::runtime_error("!USAGE! Input file '" + filename + "' does not exist. Please enter valid file name");
 }
+
+void Reader::ModuleFileReader::reset() { file_.clear(); }
 
 bool Reader::ModuleFileReader::next(Event& event) {
   // check for end of files
