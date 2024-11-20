@@ -33,7 +33,7 @@ vector<pair<uint, uint> > listOfGoodEvents(string inputFileName) {
     for (size_t group = 0; group < activeGroupsN; ++group) {
       const auto &group_event = event.groups().at(group);
       isGoodEvent &= (group_event.controlBits() == 0);
-      isGoodEvent &= (group_event.triggerCounter() == 1);
+      isGoodEvent &= (group_event.startIndexCell() == 1);
     }
 
     if (!isGoodEvent)

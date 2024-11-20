@@ -69,7 +69,7 @@ bool Reader::ModuleFileReader::next(Event& event) {
     uint32_t header_payload;
     file_.read((char*)&header_payload, sizeof(uint32_t));
     auto& group_info = event.addGroup(ChannelGroup(header_payload));
-    const auto tcn = group_info.triggerCounter();
+    const auto tcn = group_info.startIndexCell();
 
     // Check if all channels were active (if 8 channels active return 3072)
     const auto nsample = group_info.numSamples();
@@ -131,6 +131,7 @@ bool Reader::ModuleFileReader::next(Event& event) {
     {  // Read group trailer (unused)
       uint32_t trailer_payload;
       file_.read((char*)&trailer_payload, sizeof(uint32_t));
+      group_info.setTriggerTimeTag(trailer_payload & 0x7fffffff);
     }
   }
   return true;

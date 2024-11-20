@@ -29,19 +29,22 @@ namespace drs4 {
 
   class ChannelGroup {
   public:
-    explicit ChannelGroup(uint32_t first_word = 0) : first_word_(first_word) {}
+    explicit ChannelGroup(uint32_t group_event_description = 0) : group_event_description_(group_event_description) {}
 
     inline uint8_t controlBits() const {
-      return first_word_ >> 30 + (first_word_ >> 18 & 0x3) + (first_word_ >> 13 & 0x7);
+      return ((group_event_description_ >> 30) & 0x3) + ((group_event_description_ >> 18) & 0x3) +
+             ((group_event_description_ >> 13) & 0x7);
     }
 
     /// trigger counter bin
-    inline uint16_t triggerCounter() const { return (first_word_ >> 20) & 0xfff; }
-    inline uint8_t frequency() const { return (first_word_ >> 16) & 0x3; }
-    inline bool triggerChannel() const { return (first_word_ >> 12) & 0x1; }
+    inline uint16_t startIndexCell() const { return (group_event_description_ >> 20) & 0x3ff; }
+    inline uint8_t frequency() const { return (group_event_description_ >> 16) & 0x3; }
+    inline bool triggerChannel() const { return (group_event_description_ >> 12) & 0x1; }
 
-    inline size_t numSamples() const { return (first_word_ & 0xfff) / 3; }
+    inline size_t numSamples() const { return (group_event_description_ & 0xfff) / 3; }
 
+    inline void setTriggerTimeTag(uint32_t trigger_time_tag) { trigger_time_tag_ = trigger_time_tag; }
+    inline uint32_t triggerTimeTag() const { return trigger_time_tag_; }
     inline void setTimes(const std::vector<float>& times) { times_ = times; }
     inline const std::vector<float> times() const { return times_; }
 
@@ -51,7 +54,8 @@ namespace drs4 {
     inline const std::map<size_t, Waveform> waveforms() const { return channel_waveforms_; }
 
   private:
-    uint32_t first_word_;
+    uint32_t group_event_description_;
+    uint32_t trigger_time_tag_{0};
     std::vector<float> times_;
     std::map<std::size_t, Waveform> channel_waveforms_;
   };
