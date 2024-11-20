@@ -21,8 +21,8 @@ vector<pair<uint, uint> > listOfGoodEvents(string inputFileName) {
 
     const auto &event = global_event.moduleEvents().begin()->second;  // single module readout
     isGoodEvent &= (event.header().init() == 0b1010);
-    isGoodEvent &= (event.header().size() == 6920);  // total event size
-    isGoodEvent &= (event.header().bf() == 0);
+    isGoodEvent &= (event.header().eventSize() == 6920);  // total event size
+    isGoodEvent &= (!event.header().boardFail());
 
     size_t activeGroupsN = 0;
     for (const auto &group_enabled : event.header().groupMask()) {
