@@ -16,6 +16,7 @@ namespace drs4 {
 
     void setFilename(const std::string&);
     void reset();
+    void rewind(size_t = 1);
     bool next(Event& event);
 
   private:
@@ -24,6 +25,7 @@ namespace drs4 {
 
     const ModuleCalibrations calibrations_{};
     std::ifstream file_;
+    std::streampos previous_position_;
   };
 }  // namespace drs4
 

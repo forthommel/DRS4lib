@@ -20,11 +20,21 @@ void ModuleFileReader::setFilename(const std::string& filename) {
 
 void ModuleFileReader::reset() { file_.clear(); }
 
+void ModuleFileReader::rewind(size_t num_payloads) {
+  if (num_payloads != 1) {
+    std::cout << "!WARNING! assuming all payloads have the same length, while rewinging " << num_payloads
+              << " payloads." << std::endl;
+    file_.seekg(num_payloads * (previous_position_ - file_.tellg()), std::ios::cur);
+  } else
+    file_.seekg(previous_position_);
+}
+
 bool ModuleFileReader::next(Event& event) {
   // check for end of files
   if (file_.eof())
     return false;
 
+  previous_position_ = file_.tellg();
   std::array<uint32_t, 4> event_header_words;
   file_.read((char*)event_header_words.data(), sizeof(event_header_words));
   const EventHeader event_header(event_header_words);

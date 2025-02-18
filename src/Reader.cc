@@ -33,10 +33,17 @@ bool Reader::next(GlobalEvent& event) {
       return false;
     if (other_event_number < 0)
       other_event_number = module_event.header().eventNumber();
-    else if (module_event.header().eventNumber() != other_event_number)
-      throw std::runtime_error("Lost synchronisation between the module readers. Event number from other readers: " +
-                               std::to_string(module_event.header().eventNumber()) +
-                               " != " + std::to_string(other_event_number) + ".");
+    else if (module_event.header().eventNumber() != other_event_number) {
+      if (module_event.header().eventNumber() != other_event_number + 1)
+        throw std::runtime_error("Lost synchronisation between the module readers. Other readers event number=" +
+                                 std::to_string(other_event_number) +
+                                 " != this event number=" + std::to_string(module_event.header().eventNumber()) + ".");
+      std::cout << "!WARNING! Off-by-one event id mismatch between module readers (this module: event #"
+                << module_event.header().eventNumber() << ", other module: event #" << other_event_number
+                << "). Rewinding module #" << module_id << " stream." << std::endl;
+      file_reader.rewind();
+      return next(event);  // off-by-one trigger, we skip it and move to the next one
+    }
     event.addModuleEvent(module_id, module_event);
   }
   return true;
