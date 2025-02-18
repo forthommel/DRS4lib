@@ -42,6 +42,7 @@ bool Reader::next(GlobalEvent& event) {
                 << module_event.header().eventNumber() << ", other module: event #" << other_event_number
                 << "). Rewinding module #" << module_id << " stream." << std::endl;
       file_reader.rewind();
+      invalid_event_ids_.emplace_back(other_event_number);
       return next(event);  // off-by-one trigger, we skip it and move to the next one
     }
     event.addModuleEvent(module_id, module_event);

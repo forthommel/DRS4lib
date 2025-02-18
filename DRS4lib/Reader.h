@@ -21,10 +21,13 @@ namespace drs4 {
     void reset();
     bool next(GlobalEvent&);
 
+    inline const std::vector<size_t>& invalidEventIds() const { return invalid_event_ids_; }
+
   private:
     const std::vector<std::string> filenames_;
 
     std::unordered_map<size_t, ModuleFileReader> files_readers_;
+    std::vector<size_t> invalid_event_ids_;
   };
 }  // namespace drs4
 
