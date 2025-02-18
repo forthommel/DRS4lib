@@ -11,10 +11,11 @@ namespace drs4 {
   public:
     explicit Event(const EventHeader& = EventHeader{});
 
+    inline void setHeader(const EventHeader& header) { header_ = header; }
     inline const EventHeader& header() const { return header_; }
 
     inline size_t numGroups() const { return groups_.size(); }
-    ChannelGroup& addGroup(const ChannelGroup&);
+    ChannelGroup& setGroup(size_t, const ChannelGroup&);
     const std::vector<ChannelGroup>& groups() const { return groups_; }
     const ChannelGroup& group(size_t) const;
 

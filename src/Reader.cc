@@ -4,6 +4,7 @@
 #include "DRS4lib/Reader.h"
 
 using namespace drs4;
+using namespace std::string_literals;
 
 Reader::Reader(const std::string& pattern, const std::vector<size_t>& modules_ids, const Calibrations& calibrations) {
   size_t i = 0;
@@ -33,10 +34,16 @@ bool Reader::next(GlobalEvent& event) {
     if (other_event_number < 0)
       other_event_number = module_event.header().eventNumber();
     else if (module_event.header().eventNumber() != other_event_number) {
-      if (module_event.header().eventNumber() != other_event_number + 1)
+      if (module_event.header().eventNumber() != other_event_number + 1) {
+        std::string readers_positions;
+        for (const auto& [other_module_id, other_file_reader] : files_readers_)
+          readers_positions +=
+              " "s + std::to_string(other_module_id) + ":" + std::to_string(other_file_reader.currentPosition());
         throw std::runtime_error("Lost synchronisation between the module readers. Other readers event number=" +
                                  std::to_string(other_event_number) +
-                                 " != this event number=" + std::to_string(module_event.header().eventNumber()) + ".");
+                                 " != this event number=" + std::to_string(module_event.header().eventNumber()) +
+                                 ". Reader positions:" + readers_positions + ".");
+      }
       std::cout << "!WARNING! Off-by-one event id mismatch between module readers (this module: event #"
                 << module_event.header().eventNumber() << ", other module: event #" << other_event_number
                 << "). Rewinding module #" << module_id << " stream." << std::endl;

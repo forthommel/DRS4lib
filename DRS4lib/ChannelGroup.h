@@ -6,7 +6,7 @@
 #include <vector>
 
 namespace drs4 {
-  using Waveform = std::vector<float>;
+  using Waveform = std::vector<double>;
 
   class ChannelGroup {
   public:
@@ -25,8 +25,8 @@ namespace drs4 {
     inline uint32_t triggerTimeTag() const { return trigger_time_tag_; }
     inline double triggerTime() const { return trigger_time_tag_multiplier_ * triggerTimeTag(); }
 
-    inline void setTimes(const std::vector<float>& times) { times_ = times; }
-    inline const std::vector<float> times() const { return times_; }
+    inline void setTimes(const std::vector<double>& times) { times_ = times; }
+    inline const std::vector<double> times() const { return times_; }
 
     void addChannelWaveform(size_t channel_id, const Waveform& waveform);
     inline const std::map<size_t, Waveform> waveforms() const { return channel_waveforms_; }
@@ -36,7 +36,7 @@ namespace drs4 {
 
     uint32_t group_event_description_;
     uint32_t trigger_time_tag_{0};
-    std::vector<float> times_;
+    std::vector<double> times_;
     std::map<std::size_t, Waveform> channel_waveforms_;
   };
 }  // namespace drs4

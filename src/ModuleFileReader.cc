@@ -33,10 +33,14 @@ bool ModuleFileReader::next(Event& event) {
     return false;
 
   previous_position_ = file_.tellg();
+
+  // initialise all buffers
   std::array<uint32_t, 4> event_header_words;
-  file_.read((char*)event_header_words.data(), sizeof(event_header_words));
-  const EventHeader event_header(event_header_words);
-  event = Event(event_header);
+  std::array<uint32_t, 3> packed_sample_frame;
+
+  file_.read(reinterpret_cast<char*>(event_header_words.data()), sizeof(event_header_words));
+  event.setHeader(EventHeader(event_header_words));
+  Waveform channel_waveform;
 
   //************************************
   // Loop over channel groups
@@ -46,23 +50,24 @@ bool ModuleFileReader::next(Event& event) {
       continue;
     // Read group header
     uint32_t header_payload;
-    file_.read((char*)&header_payload, sizeof(uint32_t));
-    auto& group_info = event.addGroup(ChannelGroup(header_payload));
-    if (group_info.frequency() >= tscale_.size())
-      throw std::runtime_error("Invalid frequency index for group " + std::to_string(group) + ": " +
-                               std::to_string(group_info.frequency()));
+    file_.read(reinterpret_cast<char*>(&header_payload), sizeof(uint32_t));
+    auto& group_info = event.setGroup(group, ChannelGroup(header_payload));
     const auto tcn = group_info.startIndexCell();
 
     // Check if all channels were active (if 8 channels active return 3072)
     const auto nsample = group_info.numSamples();
     //std::cout << " Group =  " << group << "   samples = " << nsample << std::endl;
+    const auto& group_calibrations = calibrations_.groupCalibrations(group);
 
     // Define time coordinate
     if (group_info.times().empty()) {  // only initialise it once
-      std::vector<float> group_times;
+      if (group_info.frequency() >= tscale_.size())
+        throw std::runtime_error("Invalid frequency index for group " + std::to_string(group) + ": " +
+                                 std::to_string(group_info.frequency()));
+      std::vector<double> group_times;
       for (size_t i = 0; i < nsample; ++i)
-        group_times.emplace_back(i * (calibrations_.groupCalibrations(group).timeCalibration((tcn + i - 1) % nsample) *
-                                      tscale_.at(group_info.frequency())));
+        group_times.emplace_back(
+            i * (group_calibrations.timeCalibration((tcn + i - 1) % nsample) * tscale_.at(group_info.frequency())));
       group_info.setTimes(group_times);
     }
 
@@ -70,10 +75,9 @@ bool ModuleFileReader::next(Event& event) {
     // Read sample info for group
     //************************************
 
-    std::array<uint32_t, 3> packed_sample_frame;
     std::vector<std::vector<uint16_t> > channel_samples(8, std::vector<uint16_t>(nsample, 0));
     for (size_t i = 0; i < nsample; ++i) {
-      file_.read((char*)packed_sample_frame.data(), sizeof(packed_sample_frame));
+      file_.read(reinterpret_cast<char*>(packed_sample_frame.data()), sizeof(packed_sample_frame));
       size_t ich = 0;
       for (const auto& sample : wordsUnpacker(packed_sample_frame)) {
         if (ich >= channel_samples.size())
@@ -88,7 +92,7 @@ bool ModuleFileReader::next(Event& event) {
     auto& trigger_samples = channel_samples.emplace_back(std::vector<uint16_t>(nsample, 0));
     if (group_info.triggerChannel()) {
       for (size_t i = 0; i < nsample / 8; ++i) {
-        file_.read((char*)packed_sample_frame.data(), sizeof(packed_sample_frame));
+        file_.read(reinterpret_cast<char*>(packed_sample_frame.data()), sizeof(packed_sample_frame));
         size_t ismp = 0;
         for (const auto& sample : wordsUnpacker(packed_sample_frame))
           trigger_samples.at(i * 8 + (ismp++)) = sample;
@@ -100,8 +104,7 @@ bool ModuleFileReader::next(Event& event) {
     //************************************
 
     for (size_t i = 0; i < channel_samples.size(); ++i) {
-      const auto& channel_calibrations = calibrations_.groupCalibrations(group).channelCalibrations(i);
-      const auto& off_mean = channel_calibrations.offMean();
+      const auto& channel_calibrations = group_calibrations.channelCalibrations(i);
       const auto& calib_sample = channel_calibrations.calibSample();
       // Fill pulses
       const auto& channel_raw_waveform = channel_samples.at(i);
@@ -109,18 +112,17 @@ bool ModuleFileReader::next(Event& event) {
         throw std::runtime_error("Unpacked a " + std::to_string(channel_raw_waveform.size()) +
                                  "-sample raw waveform while only " + std::to_string(calib_sample.size()) +
                                  " are allowed.");
-      Waveform channel_waveform(channel_raw_waveform.size());
+      channel_waveform.resize(channel_raw_waveform.size());
       for (size_t j = 0; j < channel_raw_waveform.size(); ++j)
-        channel_waveform.at(j) =
-            1000. * (((double(channel_raw_waveform.at(j)) - double(off_mean.at((j + tcn) % nsample))) -
-                      double(calib_sample.at(j))) /
-                         4095. -
-                     0.5);
+        channel_waveform[j] =
+            coeff_ * ((channel_raw_waveform.at(j) - channel_calibrations.offMean().at((j + tcn) % nsample)) -
+                      calib_sample.at(j)) -
+            0.5;
       group_info.addChannelWaveform(i, channel_waveform);
     }
     {  // Read group trailer (unused)
       uint32_t trailer_payload;
-      file_.read((char*)&trailer_payload, sizeof(uint32_t));
+      file_.read(reinterpret_cast<char*>(&trailer_payload), sizeof(uint32_t));
       group_info.setTriggerTimeTag(trailer_payload & 0x7fffffff);
     }
   }
