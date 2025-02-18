@@ -5,7 +5,7 @@
 #include <iostream>
 
 #include "DRS4lib/Calibrations.h"
-#include "DRS4lib/DataFormat.h"
+#include "DRS4lib/Event.h"
 #include "DRS4lib/Reader.h"
 
 int main() {

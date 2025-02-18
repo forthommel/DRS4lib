@@ -1,7 +1,7 @@
 #include <algorithm>
 #include <iostream>
 
-#include "DRS4lib/DataFormat.h"
+#include "DRS4lib/Event.h"
 #include "DRS4lib/InputParser.h"
 #include "DRS4lib/Reader.h"
 
@@ -31,7 +31,7 @@ vector<pair<uint, uint> > listOfGoodEvents(string inputFileName) {
     }
     isGoodEvent &= (activeGroupsN == 2);
     for (size_t group = 0; group < activeGroupsN; ++group) {
-      const auto &group_event = event.groups().at(group);
+      const auto &group_event = event.group(group);
       isGoodEvent &= (group_event.controlBits() == 0);
       isGoodEvent &= (group_event.startIndexCell() == 1);
     }

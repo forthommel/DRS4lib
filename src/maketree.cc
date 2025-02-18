@@ -6,7 +6,7 @@
 #include <TTree.h>
 
 #include "DRS4lib/Calibrations.h"
-#include "DRS4lib/DataFormat.h"
+#include "DRS4lib/Event.h"
 #include "DRS4lib/InputParser.h"
 #include "DRS4lib/Reader.h"
 
@@ -99,8 +99,8 @@ int main(int argc, char** argv) {
     event = nGoodEvents;  // for output tree
 
     const auto& module_event = global_event.moduleEvents().begin()->second;  // single module
-    for (size_t igr = 0; igr < module_event.groups().size(); ++igr) {
-      const auto& group_event = module_event.groups().at(igr);
+    for (size_t igr = 0; igr < module_event.numGroups(); ++igr) {
+      const auto& group_event = module_event.group(igr);
       for (const auto& [ich, waveform] : group_event.waveforms()) {
         for (size_t it = 0; it < waveform.size(); ++it) {
           size_t indx = it + 1024 * ich + (1024 * 9) * igr;

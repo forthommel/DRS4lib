@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "DRS4lib/DataFormat.h"
+#include "DRS4lib/Event.h"
 #include "DRS4lib/Reader.h"
 
 using namespace drs4;
@@ -25,7 +25,6 @@ void Reader::reset() {
 }
 
 bool Reader::next(GlobalEvent& event) {
-  event.clear();
   ssize_t other_event_number = -999;
   for (auto& [module_id, file_reader] : files_readers_) {
     Event module_event;
@@ -45,7 +44,7 @@ bool Reader::next(GlobalEvent& event) {
       invalid_event_ids_.emplace_back(other_event_number);
       return next(event);  // off-by-one trigger, we skip it and move to the next one
     }
-    event.addModuleEvent(module_id, module_event);
+    event.setModuleEvent(module_id, module_event);
   }
   return true;
 }

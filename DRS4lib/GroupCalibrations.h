@@ -17,7 +17,7 @@ namespace drs4 {
 
     friend std::ostream& operator<<(std::ostream&, const GroupCalibrations&);
 
-    inline const std::vector<double> timeCalibrations() const { return tcal_; }
+    double timeCalibration(size_t) const;
     const ChannelCalibrations& channelCalibrations(size_t) const;
 
   private:

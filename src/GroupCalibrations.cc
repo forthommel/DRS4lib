@@ -58,6 +58,12 @@ const ChannelCalibrations& GroupCalibrations::channelCalibrations(size_t ich) co
   return channels_calibrations_.at(ich);
 }
 
+double GroupCalibrations::timeCalibration(size_t ismp) const {
+  if (ismp >= tcal_.size())
+    throw std::runtime_error("Failed to retrieve time calibration for sample '" + std::to_string(ismp) + "'.");
+  return tcal_.at(ismp);
+}
+
 namespace drs4 {
   std::ostream& operator<<(std::ostream& os, const GroupCalibrations& calib) {
     os << "GroupCalibrations{dV_sum=" << calib.dV_sum_ << ", Channel=[";

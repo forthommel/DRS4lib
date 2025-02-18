@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "DRS4lib/DataFormat.h"
+#include "DRS4lib/Event.h"
 #include "DRS4lib/ModuleFileReader.h"
 
 using namespace drs4;
@@ -48,6 +48,9 @@ bool ModuleFileReader::next(Event& event) {
     uint32_t header_payload;
     file_.read((char*)&header_payload, sizeof(uint32_t));
     auto& group_info = event.addGroup(ChannelGroup(header_payload));
+    if (group_info.frequency() >= tscale_.size())
+      throw std::runtime_error("Invalid frequency index for group " + std::to_string(group) + ": " +
+                               std::to_string(group_info.frequency()));
     const auto tcn = group_info.startIndexCell();
 
     // Check if all channels were active (if 8 channels active return 3072)
@@ -58,9 +61,8 @@ bool ModuleFileReader::next(Event& event) {
     if (group_info.times().empty()) {  // only initialise it once
       std::vector<float> group_times;
       for (size_t i = 0; i < nsample; ++i)
-        group_times.emplace_back(
-            i * (calibrations_.groupCalibrations(group).timeCalibrations().at((i - 1 + tcn) % nsample) *
-                 tscale_.at(group_info.frequency())));
+        group_times.emplace_back(i * (calibrations_.groupCalibrations(group).timeCalibration((tcn + i - 1) % nsample) *
+                                      tscale_.at(group_info.frequency())));
       group_info.setTimes(group_times);
     }
 
@@ -73,8 +75,13 @@ bool ModuleFileReader::next(Event& event) {
     for (size_t i = 0; i < nsample; ++i) {
       file_.read((char*)packed_sample_frame.data(), sizeof(packed_sample_frame));
       size_t ich = 0;
-      for (const auto& sample : wordsUnpacker(packed_sample_frame))
+      for (const auto& sample : wordsUnpacker(packed_sample_frame)) {
+        if (ich >= channel_samples.size())
+          throw std::runtime_error("Trying to fill sample #" + std::to_string(i) + " for channel " +
+                                   std::to_string(ich) + ", while only " + std::to_string(channel_samples.size()) +
+                                   " are allowed.");
         channel_samples.at(ich++).at(i) = sample;
+      }
     }
 
     // Trigger channel
@@ -98,6 +105,10 @@ bool ModuleFileReader::next(Event& event) {
       const auto& calib_sample = channel_calibrations.calibSample();
       // Fill pulses
       const auto& channel_raw_waveform = channel_samples.at(i);
+      if (channel_raw_waveform.size() > calib_sample.size())
+        throw std::runtime_error("Unpacked a " + std::to_string(channel_raw_waveform.size()) +
+                                 "-sample raw waveform while only " + std::to_string(calib_sample.size()) +
+                                 " are allowed.");
       Waveform channel_waveform(channel_raw_waveform.size());
       for (size_t j = 0; j < channel_raw_waveform.size(); ++j)
         channel_waveform.at(j) =
