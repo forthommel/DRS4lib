@@ -9,6 +9,12 @@ uint8_t ChannelGroup::controlBits() const {
          ((group_event_description_ >> 13) & 0x7);
 }
 
-void ChannelGroup::addChannelWaveform(size_t channel_id, const Waveform& waveform) {
+void ChannelGroup::setChannelWaveform(size_t channel_id, const Waveform& waveform) {
   channel_waveforms_[channel_id] = waveform;
+}
+
+void ChannelGroup::setTriggerTimeTag(uint32_t trigger_time_tag, bool overflow) {
+  trigger_time_tag_ = trigger_time_tag;
+  if (overflow)
+    trigger_time_tag_ += 0xffffffff;
 }

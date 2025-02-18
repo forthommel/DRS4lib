@@ -65,9 +65,11 @@ bool ModuleFileReader::next(Event& event) {
         throw std::runtime_error("Invalid frequency index for group " + std::to_string(group) + ": " +
                                  std::to_string(group_info.frequency()));
       std::vector<double> group_times;
-      for (size_t i = 0; i < nsample; ++i)
-        group_times.emplace_back(
-            i * (group_calibrations.timeCalibration((tcn + i - 1) % nsample) * tscale_.at(group_info.frequency())));
+      for (size_t sample_id = 0; sample_id < nsample; ++sample_id) {
+        const auto index = (tcn + sample_id - 1) % nsample;
+        group_times.emplace_back(sample_id *
+                                 (group_calibrations.timeCalibration(index) * tscale_.at(group_info.frequency())));
+      }
       group_info.setTimes(group_times);
     }
 
@@ -76,15 +78,15 @@ bool ModuleFileReader::next(Event& event) {
     //************************************
 
     std::vector<std::vector<uint16_t> > channel_samples(8, std::vector<uint16_t>(nsample, 0));
-    for (size_t i = 0; i < nsample; ++i) {
+    for (size_t sample_id = 0; sample_id < nsample; ++sample_id) {
       file_.read(reinterpret_cast<char*>(packed_sample_frame.data()), sizeof(packed_sample_frame));
-      size_t ich = 0;
+      size_t channel_id = 0;
       for (const auto& sample : wordsUnpacker(packed_sample_frame)) {
-        if (ich >= channel_samples.size())
-          throw std::runtime_error("Trying to fill sample #" + std::to_string(i) + " for channel " +
-                                   std::to_string(ich) + ", while only " + std::to_string(channel_samples.size()) +
-                                   " are allowed.");
-        channel_samples.at(ich++).at(i) = sample;
+        if (channel_id >= channel_samples.size())
+          throw std::runtime_error("Trying to fill sample #" + std::to_string(sample_id) + " for channel " +
+                                   std::to_string(channel_id) + ", while only " +
+                                   std::to_string(channel_samples.size()) + " are allowed.");
+        channel_samples.at(channel_id++).at(sample_id) = sample;
       }
     }
 
@@ -103,27 +105,31 @@ bool ModuleFileReader::next(Event& event) {
     // Loop over channels 0-8
     //************************************
 
-    for (size_t i = 0; i < channel_samples.size(); ++i) {
-      const auto& channel_calibrations = group_calibrations.channelCalibrations(i);
+    for (size_t channel_id = 0; channel_id < channel_samples.size(); ++channel_id) {
+      const auto& channel_calibrations = group_calibrations.channelCalibrations(channel_id);
       const auto& calib_sample = channel_calibrations.calibSample();
+      const auto& off_mean = channel_calibrations.offMean();
       // Fill pulses
-      const auto& channel_raw_waveform = channel_samples.at(i);
-      if (channel_raw_waveform.size() > calib_sample.size())
-        throw std::runtime_error("Unpacked a " + std::to_string(channel_raw_waveform.size()) +
-                                 "-sample raw waveform while only " + std::to_string(calib_sample.size()) +
-                                 " are allowed.");
+      const auto& channel_raw_waveform = channel_samples.at(channel_id);
       channel_waveform.resize(channel_raw_waveform.size());
-      for (size_t j = 0; j < channel_raw_waveform.size(); ++j)
-        channel_waveform[j] =
-            coeff_ * ((channel_raw_waveform.at(j) - channel_calibrations.offMean().at((j + tcn) % nsample)) -
-                      calib_sample.at(j)) -
-            0.5;
-      group_info.addChannelWaveform(i, channel_waveform);
+      for (size_t sample_id = 0; sample_id < channel_raw_waveform.size(); ++sample_id) {
+        if (calib_sample.count(sample_id) == 0)
+          throw std::runtime_error("Unpacked a " + std::to_string(channel_raw_waveform.size()) +
+                                   "-sample raw waveform while only " + std::to_string(calib_sample.size()) +
+                                   " are allowed.");
+        const auto index = (sample_id + tcn) % nsample;
+        if (off_mean.count(index) == 0)
+          throw std::runtime_error("Invalid index for off-mean computation: " + std::to_string(index) +
+                                   " is not part of calibration values for channel " + std::to_string(channel_id));
+        channel_waveform[sample_id] =
+            coeff_ * (channel_raw_waveform.at(sample_id) - off_mean.at(index) - calib_sample.at(sample_id)) - 0.5;
+      }
+      group_info.setChannelWaveform(channel_id, channel_waveform);
     }
     {  // Read group trailer (unused)
       uint32_t trailer_payload;
       file_.read(reinterpret_cast<char*>(&trailer_payload), sizeof(uint32_t));
-      group_info.setTriggerTimeTag(trailer_payload & 0x7fffffff);
+      group_info.setTriggerTimeTag(trailer_payload & 0x7fffffff, (trailer_payload >> 31) & 0x1);
     }
   }
   return true;

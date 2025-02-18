@@ -2,7 +2,7 @@
 #define DRS4lib_ChannelGroup_h
 
 #include <cstdint>
-#include <map>
+#include <unordered_map>
 #include <vector>
 
 namespace drs4 {
@@ -21,23 +21,23 @@ namespace drs4 {
 
     inline size_t numSamples() const { return (group_event_description_ & 0xfff) / 3; }
 
-    inline void setTriggerTimeTag(uint32_t trigger_time_tag) { trigger_time_tag_ = trigger_time_tag; }
-    inline uint32_t triggerTimeTag() const { return trigger_time_tag_; }
+    void setTriggerTimeTag(uint32_t trigger_time_tag, bool overflow = false);
+    inline uint64_t triggerTimeTag() const { return trigger_time_tag_; }
     inline double triggerTime() const { return trigger_time_tag_multiplier_ * triggerTimeTag(); }
 
     inline void setTimes(const std::vector<double>& times) { times_ = times; }
     inline const std::vector<double> times() const { return times_; }
 
-    void addChannelWaveform(size_t channel_id, const Waveform& waveform);
-    inline const std::map<size_t, Waveform> waveforms() const { return channel_waveforms_; }
+    void setChannelWaveform(size_t channel_id, const Waveform& waveform);
+    inline const std::unordered_map<size_t, Waveform> waveforms() const { return channel_waveforms_; }
 
   private:
     static constexpr double trigger_time_tag_multiplier_ = 8.5e-9;  ///< trigger time multiplier (in s)
 
     uint32_t group_event_description_;
-    uint32_t trigger_time_tag_{0};
+    uint64_t trigger_time_tag_{0ull};
     std::vector<double> times_;
-    std::map<std::size_t, Waveform> channel_waveforms_;
+    std::unordered_map<std::size_t, Waveform> channel_waveforms_;
   };
 }  // namespace drs4
 
