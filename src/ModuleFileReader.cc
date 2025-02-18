@@ -11,9 +11,7 @@ ModuleFileReader::ModuleFileReader(const std::string& filename, const ModuleCali
 }
 
 void ModuleFileReader::setFilename(const std::string& filename) {
-  //**********************************************************
-  // Check if has valid input files, otherwise exit with error
-  //**********************************************************
+  // check if input file is valid, otherwise throw runtime error exception
   if (file_ = std::ifstream(filename, std::fstream::in | std::fstream::binary); !file_.is_open())
     throw std::runtime_error("!USAGE! Input file '" + filename + "' does not exist. Please enter valid file name");
 }
@@ -80,13 +78,13 @@ bool ModuleFileReader::next(Event& event) {
     }
 
     // Trigger channel
+    auto& trigger_samples = channel_samples.emplace_back(std::vector<uint16_t>(nsample, 0));
     if (group_info.triggerChannel()) {
-      auto& trigger_samples = channel_samples.emplace_back(std::vector<uint16_t>(nsample, 0));
       for (size_t i = 0; i < nsample / 8; ++i) {
         file_.read((char*)packed_sample_frame.data(), sizeof(packed_sample_frame));
         size_t ismp = 0;
         for (const auto& sample : wordsUnpacker(packed_sample_frame))
-          trigger_samples.at(i * 8 + ismp) = sample;
+          trigger_samples.at(i * 8 + (ismp++)) = sample;
       }
     }
 
