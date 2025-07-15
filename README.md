@@ -1,15 +1,24 @@
-# RADiCAL_TB_May2023
+# Readout library for DRS4 outputs
 
-Files in this repository help to create ROOT TTree of uncorrupted and calibrated events from both DRS modules that belong to the same trigger. The following steps are needed
+DRS4lib is a C++ library for the unpacking and recasting into high level objects of raw waveforms acquired using the Domino Ring Sampling (DRS4) ASIC developed in PSI, Switzerland.
+In particular, the packing performed by the CAEN V1742 (32+2 channels, VME) and N6742 (16+1 channels, NIM) commercial versions is handled, and methods to combine several modules into a single stream are provided.
+It also performs the calibration of waveforms on the fly with the help of a calibration conditions dictionary holding values for each module.
 
 ## Compile
-```
-make listGoodEvents
-make maketree
-make merge
+
+This library can be built using CMake, with its standard recipe:
+```sh
+mkdir build && cd build
+cmake ..
+make
 ```
 
-## Make list of events
+## Utilities
+
+This library is based on @ledovsk's implementation in the context of past test beam campaigns (e.g. RADiCAL in May 2023 at CERN SPS), and therefore encompasses a few utilities developed for these specific usages.
+For instance, a ROOT TTree can be built with high level information unpacked from streams, or a canvas can be shown with several channel waveforms.
+
+### Make list of events
 
 Uncorrupted DRS event is an event without bad flags:
 * no board failure flag
@@ -28,7 +37,7 @@ This step is done with
 ./listGoodEvents
 ```
 
-## TTree of calibrated events
+### TTree of calibrated events
 
 Create TTree for all events in each DRS separately.
 Calibration is applied at this step also:
@@ -48,7 +57,7 @@ This step is done with
 ./merge
 ```
 
-## Example of analysis
+### Example of analysis
 
 A simple example showing 
 * how to decode individual waveforms from ROOT TTree 
