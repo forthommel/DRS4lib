@@ -18,6 +18,7 @@ add_library(DRS4lib SHARED ${sources})
 target_link_libraries(DRS4lib PUBLIC ROOT::Core ROOT::Gpad ROOT::Hist ROOT::Tree)
 install(TARGETS DRS4lib DESTINATION ${CMAKE_INSTALL_LIBDIR})
 install(DIRECTORY DRS4lib DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+add_subdirectory(test)
 
 foreach(_exec_src ${executables_sources})
   get_filename_component(exec_bin ${_exec_src} NAME_WE)
