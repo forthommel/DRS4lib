@@ -14,6 +14,9 @@ namespace drs4 {
     explicit ModuleFileReader(const std::string& filename, const ModuleCalibrations&);
     ModuleFileReader() = default;
 
+    static constexpr std::array<double, 4> SAMPLING_FREQUENCIES = {1., 2., 5., 6.6667};
+    static std::vector<uint16_t> wordsUnpacker(const std::array<uint32_t, 3>& words);
+
     void setFilename(const std::string&);
     void reset();
     void rewind(size_t = 1);
@@ -22,9 +25,7 @@ namespace drs4 {
     std::streampos currentPosition() const { return previous_position_; }
 
   private:
-    static constexpr std::array<double, 4> tscale_ = {1., 2., 5., 6.6667};
     static constexpr double coeff_ = 1. / 4095.;
-    static std::vector<uint16_t> wordsUnpacker(const std::array<uint32_t, 3>& words);
 
     const ModuleCalibrations calibrations_{};
     std::ifstream file_;

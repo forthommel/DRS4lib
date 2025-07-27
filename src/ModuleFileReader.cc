@@ -61,14 +61,14 @@ bool ModuleFileReader::next(Event& event) {
 
     // Define time coordinate
     if (group_info.times().empty()) {  // only initialise it once
-      if (group_info.frequency() >= tscale_.size())
+      if (group_info.frequency() >= SAMPLING_FREQUENCIES.size())
         throw std::runtime_error("Invalid frequency index for group " + std::to_string(group) + ": " +
                                  std::to_string(group_info.frequency()));
       std::vector<double> group_times;
       for (size_t sample_id = 0; sample_id < nsample; ++sample_id) {
         const auto index = (tcn + sample_id - 1) % nsample;
-        group_times.emplace_back(sample_id *
-                                 (group_calibrations.timeCalibration(index) * tscale_.at(group_info.frequency())));
+        group_times.emplace_back(
+            sample_id * (group_calibrations.timeCalibration(index) * SAMPLING_FREQUENCIES.at(group_info.frequency())));
       }
       group_info.setTimes(group_times);
     }
