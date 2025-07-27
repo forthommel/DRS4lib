@@ -109,24 +109,9 @@ bool ModuleFileReader::next(Event& event) {
     //************************************
 
     for (size_t channel_id = 0; channel_id < channel_samples.size(); ++channel_id) {
-      const auto& channel_calibrations = group_calibrations.channelCalibrations(channel_id);
-      const auto& calib_sample = channel_calibrations.calibSample();
-      const auto& off_mean = channel_calibrations.offMean();
       // Fill pulses
-      const auto& channel_raw_waveform = channel_samples.at(channel_id);
-      channel_waveform.resize(channel_raw_waveform.size());
-      for (size_t sample_id = 0; sample_id < channel_raw_waveform.size(); ++sample_id) {
-        if (calib_sample.count(sample_id) == 0)
-          throw std::runtime_error("Unpacked a " + std::to_string(channel_raw_waveform.size()) +
-                                   "-sample raw waveform while only " + std::to_string(calib_sample.size()) +
-                                   " are allowed.");
-        const auto index = (sample_id + tcn) % nsample;
-        if (off_mean.count(index) == 0)
-          throw std::runtime_error("Invalid index for off-mean computation: " + std::to_string(index) +
-                                   " is not part of calibration values for channel " + std::to_string(channel_id));
-        channel_waveform[sample_id] =
-            coeff_ * (channel_raw_waveform.at(sample_id) - off_mean.at(index) - calib_sample.at(sample_id)) - 0.5;
-      }
+      group_calibrations.channelCalibrations(channel_id)
+          .calibrate(tcn, channel_samples.at(channel_id), channel_waveform);
       group_info.setChannelWaveform(channel_id, channel_waveform);
     }
     {  // Read group trailer (unused)

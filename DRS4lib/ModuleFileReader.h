@@ -25,8 +25,6 @@ namespace drs4 {
     std::streampos currentPosition() const { return previous_position_; }
 
   private:
-    static constexpr double coeff_ = 1. / 4095.;
-
     const ModuleCalibrations calibrations_{};
     std::ifstream file_;
     std::streampos previous_position_;
