@@ -78,10 +78,12 @@ bool ModuleFileReader::next(Event& event) {
     //************************************
 
     std::vector<std::vector<uint16_t> > channel_samples(8, std::vector<uint16_t>(nsample, 0));
+    std::array<uint16_t, 8> samples;
     for (size_t sample_id = 0; sample_id < nsample; ++sample_id) {
       file_.read(reinterpret_cast<char*>(packed_sample_frame.data()), sizeof(packed_sample_frame));
       size_t channel_id = 0;
-      for (const auto& sample : wordsUnpacker(packed_sample_frame)) {
+      wordsUnpacker(packed_sample_frame, samples);
+      for (const auto& sample : samples) {
         if (channel_id >= channel_samples.size())
           throw std::runtime_error("Trying to fill sample #" + std::to_string(sample_id) + " for channel " +
                                    std::to_string(channel_id) + ", while only " +
@@ -96,7 +98,8 @@ bool ModuleFileReader::next(Event& event) {
       for (size_t i = 0; i < nsample / 8; ++i) {
         file_.read(reinterpret_cast<char*>(packed_sample_frame.data()), sizeof(packed_sample_frame));
         size_t ismp = 0;
-        for (const auto& sample : wordsUnpacker(packed_sample_frame))
+        wordsUnpacker(packed_sample_frame, samples);
+        for (const auto& sample : samples)
           trigger_samples.at(i * 8 + (ismp++)) = sample;
       }
     }
@@ -135,13 +138,13 @@ bool ModuleFileReader::next(Event& event) {
   return true;
 }
 
-std::vector<uint16_t> ModuleFileReader::wordsUnpacker(const std::array<uint32_t, 3>& words) {
-  return std::vector<uint16_t>{uint16_t(words.at(0) & 0xfff),
-                               uint16_t((words.at(0) >> 12) & 0xfff),
-                               uint16_t((words.at(0) >> 24) | ((words.at(1) & 0xf) << 8)),
-                               uint16_t((words.at(1) >> 4) & 0xfff),
-                               uint16_t((words.at(1) >> 16) & 0xfff),
-                               uint16_t((words.at(1) >> 28) | ((words.at(2) & 0xff) << 4)),
-                               uint16_t((words.at(2) >> 8) & 0xfff),
-                               uint16_t(words.at(2) >> 20)};
+void ModuleFileReader::wordsUnpacker(const std::array<uint32_t, 3>& words, std::array<uint16_t, 8>& samples) {
+  samples[0] = words.at(0) & 0xfff;
+  samples[1] = (words.at(0) >> 12) & 0xfff;
+  samples[2] = (words.at(0) >> 24) | ((words.at(1) & 0xf) << 8);
+  samples[3] = (words.at(1) >> 4) & 0xfff;
+  samples[4] = (words.at(1) >> 16) & 0xfff;
+  samples[5] = (words.at(1) >> 28) | ((words.at(2) & 0xff) << 4);
+  samples[6] = (words.at(2) >> 8) & 0xfff;
+  samples[7] = words.at(2) >> 20;
 }
