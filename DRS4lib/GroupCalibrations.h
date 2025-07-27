@@ -9,7 +9,7 @@
 namespace drs4 {
   class GroupCalibrations {
   public:
-    explicit GroupCalibrations(size_t num_channels, const std::string& path);
+    explicit GroupCalibrations(size_t num_channels, const std::string& path, bool legacy_format);
 
     void loadVoltageCalibrations(const std::string& postfix = "_cell.txt");
     void loadSampleCalibrations(const std::string& postfix = "_nsample.txt");
@@ -22,6 +22,7 @@ namespace drs4 {
 
   private:
     const std::string base_path_;
+    const bool legacy_format_;
 
     std::vector<ChannelCalibrations> channels_calibrations_;
     std::vector<double> tcal_dV_;

@@ -7,10 +7,12 @@ Calibrations::Calibrations(const std::string& path, const std::string& filename_
 
 const ModuleCalibrations& Calibrations::addModuleCalibrations(size_t module_id,
                                                               size_t num_groups,
-                                                              size_t num_channels) {
+                                                              size_t num_channels,
+                                                              bool legacy_format) {
   modules_calibrations_.insert(std::make_pair(
       module_id,
-      ModuleCalibrations(num_groups, num_channels, base_path_ / std::to_string(module_id) / filename_base_path_)));
+      ModuleCalibrations(
+          num_groups, num_channels, base_path_ / std::to_string(module_id) / filename_base_path_, legacy_format)));
   return moduleCalibrations(module_id);
 }
 

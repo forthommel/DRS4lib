@@ -12,7 +12,10 @@ namespace drs4 {
 
     friend std::ostream& operator<<(std::ostream&, const Calibrations&);
 
-    const ModuleCalibrations& addModuleCalibrations(size_t module_id, size_t num_groups = 2, size_t num_channels = 8);
+    const ModuleCalibrations& addModuleCalibrations(size_t module_id,
+                                                    size_t num_groups = 2,
+                                                    size_t num_channels = 8,
+                                                    bool legacy_format = false);
     const ModuleCalibrations& moduleCalibrations(size_t module_id) const;
 
   private:

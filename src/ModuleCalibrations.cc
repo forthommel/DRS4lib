@@ -5,13 +5,16 @@
 
 using namespace drs4;
 
-ModuleCalibrations::ModuleCalibrations(size_t num_groups, size_t num_channels, const std::string& path) {
+ModuleCalibrations::ModuleCalibrations(size_t num_groups,
+                                       size_t num_channels,
+                                       const std::string& path,
+                                       bool new_format) {
   for (size_t i = 0; i < num_groups; ++i)
-    addGroupCalibrations(num_channels, path + "gr" + std::to_string(i));
+    addGroupCalibrations(num_channels, path + "gr" + std::to_string(i), new_format);
 }
 
-void ModuleCalibrations::addGroupCalibrations(size_t num_channels, const std::string& path) {
-  groups_calibrations_.emplace_back(num_channels, path);
+void ModuleCalibrations::addGroupCalibrations(size_t num_channels, const std::string& path, bool new_format) {
+  groups_calibrations_.emplace_back(num_channels, path, new_format);
 }
 
 const GroupCalibrations& ModuleCalibrations::groupCalibrations(size_t igroup) const {
