@@ -34,12 +34,8 @@ bool ModuleFileReader::next(Event& event) {
 
   previous_position_ = file_.tellg();
 
-  // initialise all buffers
-  std::array<uint32_t, 4> event_header_words;
-  std::array<uint32_t, 3> packed_sample_frame;
-
-  file_.read(reinterpret_cast<char*>(event_header_words.data()), sizeof(event_header_words));
-  event.setHeader(EventHeader(event_header_words));
+  file_.read(reinterpret_cast<char*>(event_header_words_.data()), sizeof(event_header_words_));
+  event.setHeader(EventHeader(event_header_words_));
   Waveform channel_waveform;
 
   //************************************
@@ -56,7 +52,6 @@ bool ModuleFileReader::next(Event& event) {
 
     // Check if all channels were active (if 8 channels active return 3072)
     const auto nsample = group_info.numSamples();
-    //std::cout << " Group =  " << group << "   samples = " << nsample << std::endl;
     const auto& group_calibrations = calibrations_.groupCalibrations(group);
 
     // Define time coordinate
@@ -80,9 +75,9 @@ bool ModuleFileReader::next(Event& event) {
     std::vector<std::vector<uint16_t> > channel_samples(8, std::vector<uint16_t>(nsample, 0));
     std::array<uint16_t, 8> samples;
     for (size_t sample_id = 0; sample_id < nsample; ++sample_id) {
-      file_.read(reinterpret_cast<char*>(packed_sample_frame.data()), sizeof(packed_sample_frame));
+      file_.read(reinterpret_cast<char*>(packed_sample_frame_.data()), sizeof(packed_sample_frame_));
       size_t channel_id = 0;
-      wordsUnpacker(packed_sample_frame, samples);
+      wordsUnpacker(packed_sample_frame_, samples);
       for (const auto& sample : samples) {
         if (channel_id >= channel_samples.size())
           throw std::runtime_error("Trying to fill sample #" + std::to_string(sample_id) + " for channel " +
@@ -96,9 +91,9 @@ bool ModuleFileReader::next(Event& event) {
     auto& trigger_samples = channel_samples.emplace_back(std::vector<uint16_t>(nsample, 0));
     if (group_info.triggerChannel()) {
       for (size_t i = 0; i < nsample / 8; ++i) {
-        file_.read(reinterpret_cast<char*>(packed_sample_frame.data()), sizeof(packed_sample_frame));
+        file_.read(reinterpret_cast<char*>(packed_sample_frame_.data()), sizeof(packed_sample_frame_));
         size_t ismp = 0;
-        wordsUnpacker(packed_sample_frame, samples);
+        wordsUnpacker(packed_sample_frame_, samples);
         for (const auto& sample : samples)
           trigger_samples.at(i * 8 + (ismp++)) = sample;
       }

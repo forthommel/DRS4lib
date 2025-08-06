@@ -28,6 +28,8 @@ namespace drs4 {
     const ModuleCalibrations calibrations_{};
     std::ifstream file_;
     std::streampos previous_position_;
+    std::array<uint32_t, 4> event_header_words_;
+    std::array<uint32_t, 3> packed_sample_frame_;
   };
 }  // namespace drs4
 
