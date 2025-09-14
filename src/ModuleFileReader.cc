@@ -120,19 +120,16 @@ bool ModuleFileReader::next(Event& event) {
 }
 
 void ModuleFileReader::wordsUnpacker(const std::array<uint32_t, 3>& words, std::array<uint16_t, 8>& samples) {
-  return wordsUnpacker(&words[0], &words[1], &words[2], samples);
+  return wordsUnpacker(words.data(), samples);
 }
 
-void ModuleFileReader::wordsUnpacker(const uint32_t* word1,
-                                     const uint32_t* word2,
-                                     const uint32_t* word3,
-                                     std::array<uint16_t, 8>& samples) {
-  samples[0] = *word1 & 0xfff;
-  samples[1] = (*word1 >> 12) & 0xfff;
-  samples[2] = (*word1 >> 24) | ((*word2 & 0xf) << 8);
-  samples[3] = (*word2 >> 4) & 0xfff;
-  samples[4] = (*word2 >> 16) & 0xfff;
-  samples[5] = (*word2 >> 28) | ((*word3 & 0xff) << 4);
-  samples[6] = (*word3 >> 8) & 0xfff;
-  samples[7] = *word3 >> 20;
+void ModuleFileReader::wordsUnpacker(const uint32_t* words, std::array<uint16_t, 8>& samples) {
+  samples[0] = words[0] & 0xfff;
+  samples[1] = (words[0] >> 12) & 0xfff;
+  samples[2] = (words[0] >> 24) | ((words[1] & 0xf) << 8);
+  samples[3] = (words[1] >> 4) & 0xfff;
+  samples[4] = (words[1] >> 16) & 0xfff;
+  samples[5] = (words[1] >> 28) | ((words[2] & 0xff) << 4);
+  samples[6] = (words[2] >> 8) & 0xfff;
+  samples[7] = words[2] >> 20;
 }

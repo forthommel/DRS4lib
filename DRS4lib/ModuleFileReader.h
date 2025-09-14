@@ -15,7 +15,7 @@ namespace drs4 {
     ModuleFileReader() = default;
 
     static constexpr std::array<double, 4> SAMPLING_FREQUENCIES = {1. / 5.e9, 1. / 2.5e9, 1. / 1.e9, 1. / 0.75e9};
-    static void wordsUnpacker(const uint32_t*, const uint32_t*, const uint32_t*, std::array<uint16_t, 8>& samples);
+    static void wordsUnpacker(const uint32_t*, std::array<uint16_t, 8>& samples);
     static void wordsUnpacker(const std::array<uint32_t, 3>& words, std::array<uint16_t, 8>& samples);
 
     void setFilename(const std::string&);
