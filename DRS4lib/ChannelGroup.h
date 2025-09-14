@@ -1,6 +1,7 @@
 #ifndef DRS4lib_ChannelGroup_h
 #define DRS4lib_ChannelGroup_h
 
+#include <cstddef>
 #include <cstdint>
 #include <unordered_map>
 #include <vector>
