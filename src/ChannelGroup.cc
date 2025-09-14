@@ -13,8 +13,4 @@ void ChannelGroup::setChannelWaveform(size_t channel_id, const Waveform& wavefor
   channel_waveforms_[channel_id] = waveform;
 }
 
-void ChannelGroup::setTriggerTimeTag(uint32_t trigger_time_tag, bool overflow) {
-  trigger_time_tag_ = trigger_time_tag;
-  if (overflow)
-    trigger_time_tag_ += 0xffffffff;
-}
+void ChannelGroup::setTriggerTimeTag(uint32_t trigger_time_tag) { trigger_time_tag_ = trigger_time_tag & 0x3fffffff; }

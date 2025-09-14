@@ -110,9 +110,10 @@ bool ModuleFileReader::next(Event& event) {
       group_info.setChannelWaveform(channel_id, channel_waveform);
     }
     {  // Read group trailer (unused)
+       //FIXME handle extended group trigger time tag on 60-bit word
       uint32_t trailer_payload;
       file_.read(reinterpret_cast<char*>(&trailer_payload), sizeof(uint32_t));
-      group_info.setTriggerTimeTag(trailer_payload & 0x7fffffff, (trailer_payload >> 31) & 0x1);
+      group_info.setTriggerTimeTag(trailer_payload & 0x3fffffff);
     }
   }
   return true;

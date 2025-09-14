@@ -21,7 +21,7 @@ namespace drs4 {
 
     inline size_t numSamples() const { return (group_event_description_ & 0xfff) / 3; }
 
-    void setTriggerTimeTag(uint32_t trigger_time_tag, bool overflow = false);
+    void setTriggerTimeTag(uint32_t trigger_time_tag);
     inline uint64_t triggerTimeTag() const { return trigger_time_tag_; }
     inline double triggerTime() const { return trigger_time_tag_multiplier_ * triggerTimeTag(); }
 
