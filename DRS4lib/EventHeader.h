@@ -10,6 +10,10 @@ namespace drs4 {
   public:
     explicit EventHeader(const std::array<uint32_t, 4>& words = {0, 0, 0, 0}) : std::array<uint32_t, 4>(words) {}
     EventHeader(const EventHeader& oth) : std::array<uint32_t, 4>(oth) {}
+    EventHeader& operator=(const EventHeader& oth) {
+      std::copy(oth.begin(), oth.end(), begin());
+      return *this;
+    }
 
     inline uint8_t init() const { return at(0) >> 28; }
     inline uint32_t eventSize() const { return at(0) & 0xfffffff; }
